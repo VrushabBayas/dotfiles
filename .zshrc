@@ -60,7 +60,8 @@ alias reload="source ~/.zshrc"
 
 # --- FZF Config ---
 # Use fd instead of find
-export FZF_DEFAULT_COMMAND='fd --type f --hidden --exclude .git'
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --exclude .git --exclude node_modules'
+
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_ALT_C_COMMAND='fd --type d --hidden --exclude .git'
 export FZF_COMPLETION_TRIGGER='**'
@@ -77,7 +78,14 @@ alias j='zi'       # Fuzzy jump to recent dirs
 # Fuzzy open file with preview
 fo() {
   local file
-  file=$(fzf --preview 'bat --style=numbers --color=always --line-range :500 {}') && nvim "$file"
+  file=$(fd . --type f --hidden --exclude .git --exclude node_modules \
+    | fzf \
+        --preview 'bat --style=numbers --color=always --line-range :500 {}' \
+        --preview-window=right:60%:wrap:follow \
+        --bind 'pgup:preview-up,pgdn:preview-down' \
+        --bind 'up:preview-up,down:preview-down' \
+        --bind 'k:preview-up,j:preview-down'
+  ) && nvim "$file"
 }
 
 # Fuzzy Git branch checkout
@@ -97,7 +105,7 @@ fj() {
 }
 
 # --- Optional: fd alias for quicker searching ---
-alias f='fd --hidden --exclude .git'
+alias f='fd --hidden --exclude .git --exclude node_modules'
 
 eval "$(fzf --zsh)"
 
